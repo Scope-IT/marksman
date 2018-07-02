@@ -1,7 +1,7 @@
 ## Marksman - A Windows agent for Snipe-IT
 
 ## Installation
-1. Download and install the latest .msi installer from the releases tab.
+1. Download and install the latest .msi installer from the [releases tab](https://github.com/Scope-IT/marksman/releases/).
 2. By default, the program will be installed in Program Files (x86)/ScopeIT/Marksman. Edit the Marksman.exe.config file to include your API key and BaseURI from the default values to the ones given by your Snipe-IT instance.
 3. Set the Company and Location parameters in Marksman.exe.config, then run the .exe.
 
@@ -29,7 +29,7 @@ You can run it via a GPO or Scheduled task (recommended way is to run the agent 
 We welcome community participation in this project. Please submit an issue or pull request to participate in the development. 
 
 ## License
-This project is licensed under the [Apache 2.0 License]http://www.apache.org/licenses/LICENSE-2.0)
+This project is licensed under the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0)
 
 ## Planned features
 - [ ] Ability to modify assets
