@@ -163,7 +163,7 @@ namespace Marksman
             SnipeSharp.Endpoints.Models.Asset currentComputer = new SnipeSharp.Endpoints.Models.Asset
             {
                 Company = currentCompany,
-                AssetTag = "156-" + serialNumber, // <-- to be implemented.. somehow, somewhere
+                AssetTag = appSettings["AssetTagPrefix"] + "-" + serialNumber, // <-- to be implemented.. somehow, somewhere
                 Model = currentModel,
                 StatusLabel = currentStatusLabel,
                 RtdLocation = currentLocation,
