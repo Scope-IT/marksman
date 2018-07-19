@@ -34,6 +34,7 @@ namespace Marksman
 
         public SnipeSharp.Endpoints.Models.Asset GetAsset(System.Collections.Specialized.NameValueCollection appSettings, SnipeItApi snipe)
         {
+            //string manufacturer = GetOutputVariable("Win32_ComputerSystem.Manufacturer");
             string manufacturer = GetOutputVariable("Win32_ComputerSystem.Manufacturer");
             string systemName = GetOutputVariable("Win32_ComputerSystem.Name");
             string serialNumber = GetOutputVariable("Win32_ComputerSystemProduct.IdentifyingNumber");
@@ -75,6 +76,9 @@ namespace Marksman
             SnipeSharp.Endpoints.SearchFilters.SearchFilter blankSearch = new SnipeSharp.Endpoints.SearchFilters.SearchFilter();
 
             // should be from config file
+
+            // TODO 
+            // Create a universal search & create if not found method
             SnipeSharp.Endpoints.Models.Company currentCompany = new SnipeSharp.Endpoints.Models.Company
             {
                 Name = appSettings["Company"]
@@ -120,10 +124,32 @@ namespace Marksman
                 currentLocation = searchedLocation;
             }
 
+            SnipeSharp.Endpoints.Models.Manufacturer currentManufacturer = new SnipeSharp.Endpoints.Models.Manufacturer
+            {
+                Name = manufacturer
+            };
+
+            SnipeSharp.Endpoints.SearchFilters.SearchFilter manufacturerFilter = new SnipeSharp.Endpoints.SearchFilters.SearchFilter()
+            {
+                Search = currentManufacturer.Name
+            };
+
+
+            SnipeSharp.Endpoints.Models.Manufacturer searhedManufacturer = snipe.ManufacturerManager.FindOne(manufacturerFilter);
+            if (searhedManufacturer == null)
+            {
+                snipe.ManufacturerManager.Create(currentManufacturer);
+                currentManufacturer = snipe.ManufacturerManager.FindOne(manufacturerFilter);
+            }
+            else
+            {
+                currentManufacturer = searhedManufacturer;
+            }
+
             SnipeSharp.Endpoints.Models.Model currentModel = new SnipeSharp.Endpoints.Models.Model
             {
                 Name = modelTotal,
-                Manufacturer = snipe.ManufacturerManager.Get(manufacturer),
+                Manufacturer = currentManufacturer,
                 Category = snipe.CategoryManager.Get(systemTypeFull),
                 ModelNumber = modelNumber,
             };
@@ -134,7 +160,7 @@ namespace Marksman
             };
 
             SnipeSharp.Endpoints.Models.Model searchedModel = snipe.ModelManager.FindOne(modelFilter);
-            if (searchedModel == null)
+            if (searchedModel == null || searchedModel.Manufacturer.Name != currentModel.Manufacturer.Name || searchedModel.Name != currentModel.Name)
             {
                 snipe.ModelManager.Create(currentModel);
                 currentModel = snipe.ModelManager.FindOne(modelFilter);
@@ -142,6 +168,7 @@ namespace Marksman
             {
                 currentModel = searchedModel;
             }
+
 
             Dictionary<string, string> customFields = new Dictionary<string, string>();
             customFields.Add("_snipeit_macaddress_1", macAddress);
@@ -340,7 +367,7 @@ namespace Marksman
             snipe.ApiSettings.BaseUrl = new Uri(appSettings["BaseURI"]);
 
             // some test queries for analyzing duplicates
-
+            /*
             SnipeSharp.Endpoints.SearchFilters.SearchFilter assetFilter = new SnipeSharp.Endpoints.SearchFilters.SearchFilter()
             {
                 Search = "156TR4090-03"
@@ -348,7 +375,7 @@ namespace Marksman
 
             List<SnipeSharp.Endpoints.Models.Asset> snipeAssets = snipe.AssetManager.FindAll(assetFilter).Rows;
 
-
+            */
             Sentry mySentry = new Sentry(appSettings); // creating new Sentry (we can have multiple for parallel execution at a later point)
 
             /* CSystemType
