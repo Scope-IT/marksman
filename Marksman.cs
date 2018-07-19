@@ -34,6 +34,7 @@ namespace Marksman
 
         public SnipeSharp.Endpoints.Models.Asset GetAsset(System.Collections.Specialized.NameValueCollection appSettings, SnipeItApi snipe)
         {
+            //string manufacturer = GetOutputVariable("Win32_ComputerSystem.Manufacturer");
             string manufacturer = GetOutputVariable("Win32_ComputerSystem.Manufacturer");
             string systemName = GetOutputVariable("Win32_ComputerSystem.Name");
             string serialNumber = GetOutputVariable("Win32_ComputerSystemProduct.IdentifyingNumber");
@@ -148,7 +149,7 @@ namespace Marksman
             SnipeSharp.Endpoints.Models.Model currentModel = new SnipeSharp.Endpoints.Models.Model
             {
                 Name = modelTotal,
-                Manufacturer = snipe.ManufacturerManager.Get(manufacturer),
+                Manufacturer = currentManufacturer,
                 Category = snipe.CategoryManager.Get(systemTypeFull),
                 ModelNumber = modelNumber,
             };
@@ -159,7 +160,7 @@ namespace Marksman
             };
 
             SnipeSharp.Endpoints.Models.Model searchedModel = snipe.ModelManager.FindOne(modelFilter);
-            if (searchedModel == null)
+            if (searchedModel == null || searchedModel.Manufacturer.Name != currentModel.Manufacturer.Name || searchedModel.Name != currentModel.Name)
             {
                 snipe.ModelManager.Create(currentModel);
                 currentModel = snipe.ModelManager.FindOne(modelFilter);
