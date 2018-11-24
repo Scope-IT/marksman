@@ -7,12 +7,35 @@ using System.Configuration;
 using System.Management;
 using System.Diagnostics;
 using System.DirectoryServices.AccountManagement;
+using System.Collections.Specialized;
 using SnipeSharp;
+using SnipeSharp.Endpoints.Models;
+using SnipeSharp.Endpoints.SearchFilters;
 
 
 namespace Marksman
 {
-   
+
+    public class PCSystemTypes {
+        public Dictionary<string, string> SystemTypes;
+    }
+
+    public class WindowsSystemTypes : PCSystemTypes
+    {
+        public WindowsSystemTypes()
+        {
+            this.SystemTypes = new Dictionary<string, string>();
+            this.SystemTypes.Add("0", "Undefined");
+            this.SystemTypes.Add("1", "Desktop");
+            this.SystemTypes.Add("2", "Laptop");
+            this.SystemTypes.Add("3", "Workstation");
+            this.SystemTypes.Add("4", "Enterprise Server");
+            this.SystemTypes.Add("5", "SOHO Server");
+            this.SystemTypes.Add("6", "Appliance PC");
+            this.SystemTypes.Add("7", "Performance Server");
+            this.SystemTypes.Add("8", "Maximum");
+        }
+    }
 
     public class Sentry // Data acquissition
     {
@@ -32,148 +55,78 @@ namespace Marksman
             Settings = appSettings;
         }
 
-        public SnipeSharp.Endpoints.Models.Asset GetAsset(System.Collections.Specialized.NameValueCollection appSettings, SnipeItApi snipe)
+        public Location GetLocation(NameValueCollection appSettings, SnipeItApi snipe)
         {
-            //string manufacturer = GetOutputVariable("Win32_ComputerSystem.Manufacturer");
-            string manufacturer = GetOutputVariable("Win32_ComputerSystem.Manufacturer");
-            string systemName = GetOutputVariable("Win32_ComputerSystem.Name");
-            string serialNumber = GetOutputVariable("Win32_ComputerSystemProduct.IdentifyingNumber");
-            string modelTotal = GetOutputVariable("Win32_ComputerSystem.Model");
-            string macAddress = GetOutputVariable("Win32_NetworkAdapter.MACAddress");
+            string assetLocation = this.Values["Location"];
+            Location currentLocation = new Location(assetLocation);
+            return currentLocation;
+        }
+
+        public StatusLabel GetStatusLabel(NameValueCollection appSettings, SnipeItApi snipe)
+        {
+            string defaultLabel = appSettings["DefaultStatusLabel"];
+            StatusLabel defaultStatusLabel = new StatusLabel(defaultLabel);
+            return defaultStatusLabel;
+        }
+
+        public Company GetCompany(NameValueCollection appSettings, SnipeItApi snipe)
+        {
+            string companyName = appSettings["Company"];
+            Company currentCompany = new Company(companyName);
+            return currentCompany;
+        }
+
+        public Category GetCategory(NameValueCollection appSettings, SnipeItApi snipe)
+        {
             string systemType = GetOutputVariable("Win32_ComputerSystem.PCSystemType");
             // TODO: Place in a separate enum class:
-
-            // This enum should be in a separate class for enums
-            Dictionary<string, string> PCSystemTypes = new Dictionary<string, string>();
-            PCSystemTypes.Add("0", "Undefined");
-            PCSystemTypes.Add("1", "Desktop");
-            PCSystemTypes.Add("2", "Laptop");
-            PCSystemTypes.Add("3", "Workstation");
-            PCSystemTypes.Add("4", "Enterprise Server");
-            PCSystemTypes.Add("5", "SOHO Server");
-            PCSystemTypes.Add("6", "Appliance PC");
-            PCSystemTypes.Add("7", "Performance Server");
-            PCSystemTypes.Add("8", "Maximum");
-
-
+            WindowsSystemTypes winTypes = new WindowsSystemTypes();
             string systemTypeFull = "Undefined";
             try
             {
-                systemTypeFull = PCSystemTypes[systemType];
+                systemTypeFull = winTypes.SystemTypes[systemType];
             }
             catch (Exception e)
             {
-                Trace.WriteLine("Exception encountered while processing PCSystemType: " + e.ToString());
+                Trace.WriteLine("Exception encountered while processing WinSystemType: " + e.ToString());
             }
+            Category currentCategory = new Category(systemTypeFull);
+            return currentCategory;
+        }
 
+        public Manufacturer GetManufacturer(NameValueCollection appSettings, SnipeItApi snipe)
+        {
+            string manufacturer = GetOutputVariable("Win32_ComputerSystem.Manufacturer");
+            Manufacturer systemManufacturer = new Manufacturer(manufacturer);
+            return systemManufacturer;
+        }
 
+        public Model GetModel(NameValueCollection appSettings, SnipeItApi snipe)
+        {
+            string modelTotal = GetOutputVariable("Win32_ComputerSystem.Model");
             // TODO: This only works is in the exact format "ModelName ModelNumber"
             List<String> modelFragments = modelTotal.Split(' ').ToList();
             string modelNumber = modelFragments[modelFragments.Count() - 1];
             string modelMake = modelFragments[0];
 
-
-            SnipeSharp.Endpoints.SearchFilters.SearchFilter blankSearch = new SnipeSharp.Endpoints.SearchFilters.SearchFilter();
-
-            // should be from config file
-
-            // TODO 
-            // Create a universal search & create if not found method
-            SnipeSharp.Endpoints.Models.Company currentCompany = new SnipeSharp.Endpoints.Models.Company
-            {
-                Name = appSettings["Company"]
-            };
-
-            SnipeSharp.Endpoints.SearchFilters.SearchFilter companyFilter = new SnipeSharp.Endpoints.SearchFilters.SearchFilter()
-            {
-                Search = currentCompany.Name
-            };
-
-            SnipeSharp.Endpoints.Models.Company searchedCompany = snipe.CompanyManager.FindOne(companyFilter);
-            if (searchedCompany == null)
-            {
-                snipe.CompanyManager.Create(currentCompany);
-                currentCompany = snipe.CompanyManager.FindOne(companyFilter);
-            } else
-            {
-                currentCompany = searchedCompany;
-            }
-
-            string assetLocation = this.Values["Location"];
-
- 
-
-            SnipeSharp.Endpoints.Models.Location currentLocation = new SnipeSharp.Endpoints.Models.Location
-            {
-                Name = assetLocation
-            };
-
-            SnipeSharp.Endpoints.SearchFilters.SearchFilter locationFilter = new SnipeSharp.Endpoints.SearchFilters.SearchFilter()
-            {
-                Search = currentLocation.Name
-            };
-
-            SnipeSharp.Endpoints.Models.Location searchedLocation = snipe.LocationManager.FindOne(locationFilter);
-            if (searchedLocation == null)
-            {
-                var result = snipe.LocationManager.Create(currentLocation);
-                currentLocation = snipe.LocationManager.FindOne(locationFilter);
-            }
-            else
-            {
-                currentLocation = searchedLocation;
-            }
-
-            SnipeSharp.Endpoints.Models.Manufacturer currentManufacturer = new SnipeSharp.Endpoints.Models.Manufacturer
-            {
-                Name = manufacturer
-            };
-
-            SnipeSharp.Endpoints.SearchFilters.SearchFilter manufacturerFilter = new SnipeSharp.Endpoints.SearchFilters.SearchFilter()
-            {
-                Search = currentManufacturer.Name
-            };
-
-
-            SnipeSharp.Endpoints.Models.Manufacturer searhedManufacturer = snipe.ManufacturerManager.FindOne(manufacturerFilter);
-            if (searhedManufacturer == null)
-            {
-                snipe.ManufacturerManager.Create(currentManufacturer);
-                currentManufacturer = snipe.ManufacturerManager.FindOne(manufacturerFilter);
-            }
-            else
-            {
-                currentManufacturer = searhedManufacturer;
-            }
-
-            SnipeSharp.Endpoints.Models.Model currentModel = new SnipeSharp.Endpoints.Models.Model
+            Model currentModel = new Model
             {
                 Name = modelTotal,
-                Manufacturer = currentManufacturer,
-                Category = snipe.CategoryManager.Get(systemTypeFull),
+                Manufacturer = null,
+                Category = null,
                 ModelNumber = modelNumber,
             };
+            return currentModel;
+        }
 
-            SnipeSharp.Endpoints.SearchFilters.SearchFilter modelFilter = new SnipeSharp.Endpoints.SearchFilters.SearchFilter()
-            {
-                Search = currentModel.Name
-            };
-
-            SnipeSharp.Endpoints.Models.Model searchedModel = snipe.ModelManager.FindOne(modelFilter);
-            if (searchedModel == null || searchedModel.Manufacturer.Name != currentModel.Manufacturer.Name || searchedModel.Name != currentModel.Name)
-            {
-                snipe.ModelManager.Create(currentModel);
-                currentModel = snipe.ModelManager.FindOne(modelFilter);
-            } else
-            {
-                currentModel = searchedModel;
-            }
-
-
+        public Asset GetAsset(NameValueCollection appSettings, SnipeItApi snipe)
+        {
+            string systemName = GetOutputVariable("Win32_ComputerSystem.Name");
+            string serialNumber = GetOutputVariable("Win32_ComputerSystemProduct.IdentifyingNumber");
+            string macAddress = GetOutputVariable("Win32_NetworkAdapter.MACAddress");
             Dictionary<string, string> customFields = new Dictionary<string, string>();
             customFields.Add("_snipeit_macaddress_1", macAddress);
-
-
+            string warrantyMonths = appSettings["WarrantyMonths"];
 
             bool isInteractive = false;
             bool interactiveParseSuccess = Boolean.TryParse(appSettings["Interactive"], out isInteractive);
@@ -182,18 +135,14 @@ namespace Marksman
                 Console.WriteLine("Enter the computer name: ");
                 systemName = Console.ReadLine();
             }
-
-            SnipeSharp.Endpoints.Models.StatusLabel currentStatusLabel = snipe.StatusLabelManager.Get("In Production");
-            string warrantyMonths = appSettings["WarrantyMonths"];
-
-
-            SnipeSharp.Endpoints.Models.Asset currentComputer = new SnipeSharp.Endpoints.Models.Asset
+            
+            Asset currentComputer = new SnipeSharp.Endpoints.Models.Asset
             {
-                Company = currentCompany,
+                Company = null,
                 AssetTag = appSettings["AssetTagPrefix"] + "-" + serialNumber, // <-- to be implemented.. somehow, somewhere
-                Model = currentModel,
-                StatusLabel = currentStatusLabel,
-                RtdLocation = currentLocation,
+                Model = null,
+                StatusLabel = null,
+                RtdLocation = null,
                 Name = systemName,
                 Serial = serialNumber,
                 WarrantyMonths = warrantyMonths,
@@ -409,12 +358,21 @@ namespace Marksman
                 mySentry.AddQuery("Location", "Config");
             }
 
-
-
             mySentry.Run();
 
-            SnipeSharp.Endpoints.Models.Asset currentComputer = mySentry.GetAsset(appSettings, snipe);
-            Broker.syncAsset(snipe, currentComputer);
+            Asset currentAsset = mySentry.GetAsset(appSettings, snipe);
+            Model currentModel = mySentry.GetModel(appSettings, snipe);
+            Manufacturer currentManufacturer = mySentry.GetManufacturer(appSettings, snipe);
+            Category currentCategory = mySentry.GetCategory(appSettings, snipe);
+            Company currentCompany = mySentry.GetCompany(appSettings, snipe);
+            StatusLabel currentStatusLabel = mySentry.GetStatusLabel(appSettings, snipe);
+            Location currentLocation = mySentry.GetLocation(appSettings, snipe);
+
+            //Broker.syncAsset(snipe, currentComputer);
+            Broker snipeBroker = new Broker();
+            snipeBroker.SyncAll(snipe, currentAsset, currentModel, currentManufacturer, currentCategory,
+                                currentCompany, currentStatusLabel, currentLocation);
+
             debugTimer.Stop();
 
             Trace.WriteLine("Total program execution time " + debugTimer.ElapsedMilliseconds + "ms.");
