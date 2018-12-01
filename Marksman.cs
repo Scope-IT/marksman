@@ -302,40 +302,17 @@ namespace Marksman
 
         static void Main(string[] args)
         {
-            //TextWriterTraceListener listener = new TextWriterTraceListener(DateTime.Today.ToShortDateString() + "marksman.log");
-            // listener.Flush();
-            //Trace.Listeners.Add(listener);
             Trace.WriteLine(DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToLongTimeString() + ": Started application.");
 
             var debugTimer = new Stopwatch();
             System.Collections.Specialized.NameValueCollection appSettings = System.Configuration.ConfigurationManager.AppSettings;
-            debugTimer.Start();
+            debugTimer.Start(); 
 
             SnipeItApi snipe = new SnipeItApi();
             snipe.ApiSettings.ApiToken = appSettings["API"];
             snipe.ApiSettings.BaseUrl = new Uri(appSettings["BaseURI"]);
 
-            // some test queries for analyzing duplicates
-            /*
-            SnipeSharp.Endpoints.SearchFilters.SearchFilter assetFilter = new SnipeSharp.Endpoints.SearchFilters.SearchFilter()
-            {
-                Search = "156TR4090-03"
-            };
-
-            List<SnipeSharp.Endpoints.Models.Asset> snipeAssets = snipe.AssetManager.FindAll(assetFilter).Rows;
-
-            */
             Sentry mySentry = new Sentry(appSettings); // creating new Sentry (we can have multiple for parallel execution at a later point)
-
-            /* CSystemType
-            Data type: uint16
-            Access type: Read-only
-     
-                Qualifiers: MappingStrings ("")
-
-                Type of the computer in use, such as laptop, desktop, or Tablet.
-                Under Win32_ComputerSystem class in WMI
-             */
 
             // Adding what we want
             mySentry.AddQuery("WMI", "SELECT Name, Manufacturer, Model, PCSystemType FROM Win32_ComputerSystem");
@@ -370,11 +347,19 @@ namespace Marksman
 
             //Broker.syncAsset(snipe, currentComputer);
             Broker snipeBroker = new Broker();
-            snipeBroker.SyncAll(snipe, currentAsset, currentModel, currentManufacturer, currentCategory,
-                                currentCompany, currentStatusLabel, currentLocation);
+            bool connectionStatus = snipeBroker.CheckConnection(appSettings);
+
+            if (connectionStatus)
+            {
+                snipeBroker.SyncAll(snipe, currentAsset, currentModel, currentManufacturer, currentCategory,
+                                    currentCompany, currentStatusLabel, currentLocation);
+            } else {
+                Console.WriteLine("ERROR: Could not connect to SnipeIT database instance.");
+                // Until a standardized logging framework is set up, quick way to make user see crash message.
+                Console.ReadKey();
+            }
 
             debugTimer.Stop();
-
             Trace.WriteLine("Total program execution time " + debugTimer.ElapsedMilliseconds + "ms.");
             Trace.WriteLine(DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToLongTimeString() + ": Exiting application.");
             Trace.WriteLine(" ");

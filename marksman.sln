@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27703.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "marksman", "marksman.csproj", "{F459D03D-C5C4-4942-A437-AA9E99635311}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "MarksmanSetup", "..\MarksmanSetup\MarksmanSetup.vdproj", "{286B022B-64E7-4E66-9AA2-87863687F860}"
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "MarksmanSetup", "..\MarksmanSetup\MarksmanSetup.vdproj", "{6CB58217-2239-4887-A1FB-E515ADAFAB69}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,8 +17,8 @@ Global
 		{F459D03D-C5C4-4942-A437-AA9E99635311}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F459D03D-C5C4-4942-A437-AA9E99635311}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F459D03D-C5C4-4942-A437-AA9E99635311}.Release|Any CPU.Build.0 = Release|Any CPU
-		{286B022B-64E7-4E66-9AA2-87863687F860}.Debug|Any CPU.ActiveCfg = Debug
-		{286B022B-64E7-4E66-9AA2-87863687F860}.Release|Any CPU.ActiveCfg = Release
+		{6CB58217-2239-4887-A1FB-E515ADAFAB69}.Debug|Any CPU.ActiveCfg = Debug
+		{6CB58217-2239-4887-A1FB-E515ADAFAB69}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
