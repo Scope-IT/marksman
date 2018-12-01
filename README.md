@@ -2,7 +2,7 @@
 
 ## Installation
 1. Download and install the latest .msi installer from the [releases tab](https://github.com/Scope-IT/marksman/releases/).
-2. By default, the program will be installed in Program Files (x86)/ScopeIT/Marksman. Edit the Marksman.exe.config file to include your API key and BaseURI from the default values to the ones given by your Snipe-IT instance.
+2. By default, the program will be installed in Program Files (x86)/Scope-IT/Marksman. Edit the Marksman.exe.config file to include your API key and BaseURI from the default values to the ones given by your Snipe-IT instance.
 3. Set the Company and Location parameters in Marksman.exe.config, then run the .exe.
 
 ## Features
@@ -32,11 +32,11 @@ We welcome community participation in this project. Please submit an issue or pu
 This project is licensed under the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0)
 
 ## Planned features
-- [ ] Ability to modify assets
-- [ ] Component-level automation
-- [ ] Additional Query types for Location
-- [ ] Better documentation
+- [ ] Component lookup (automatic tracking of connected hard drives, CPU, GPU, etc.)
+- [ ] Automatic update feature (tracking of computer name and other property changes)
+- [ ] Additional query types for location
 - [ ] Warranty lookup APIs
+- [ ] Cross-platform (Windows/MacOS/Linux) agent using Mono
 
 ## Acknowledgments
  * The project is based on [SnipeSharp API](https://github.com/cnitschkowski/SnipeSharp) by [barrycarey](https://github.com/barrycarey) and [cnitschkowski](https://github.com/cnitschkowski) with modifications by [velaar](https://github.com/velaar)
