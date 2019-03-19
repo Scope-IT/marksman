@@ -14,7 +14,7 @@
   - Status label (from config file)
   - Mac address
   - Make, model of the machine (as reported to Windows)
-* Ensures that the asses created is unique
+* Ensures that the assets created is unique
 * New locations, makes, models are created as needed
 
 
