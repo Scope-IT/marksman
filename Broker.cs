@@ -199,15 +199,16 @@ namespace Marksman
                 bool isIdentical = IsIdentical(currentAsset, dbAsset);
                 if (isIdentical)
                 {
-                    Console.WriteLine("No changes required!");
+                    Console.WriteLine("No changes required! Asset already exists and is up-to-date.");
                 } else
                 {
                     Console.WriteLine("Changes in asset detected. Updating:");
-                    // Insert update here
+
+                    // Setting old ID for consistency
+                    currentAsset.Id = dbAsset.Id;
+                    messages.Add(snipe.AssetManager.Update(currentAsset));
                 }
             }
-
-            snipe.AssetManager.Create(currentAsset);
             
             return messages;
         }
