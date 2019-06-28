@@ -20,6 +20,34 @@ namespace Marksman
 
         }
 
+        public bool IsIdentical(Asset a1, Asset a2)
+        {
+            // We only need to check fields that are being populated by the Marksman agent
+            // i.e.. not ID, since that is managed by DB
+
+            if (a1.AssetTag != a2.AssetTag || a1.Serial != a2.Serial || a1.Name != a2.Name)
+            {
+                return false;
+            }
+
+            if (a1.WarrantyMonths != a2.WarrantyMonths)
+            {
+                return false;
+            }
+
+
+            // Checking sub-object IDs
+            if (a1.Company?.Id != a2.Company?.Id || a1.Model?.Id != a2.Model?.Id ||
+                a1.StatusLabel?.Id != a2.StatusLabel?.Id || a1.Location?.Id != a2.Location?.Id)
+            {
+                return false;
+            }
+
+            // Should be something for custom fields -> for now leaving blank
+
+            return true;
+        }
+
         public bool CheckConnection(NameValueCollection appSettings)
         {
             // This method might seem overly complicated for what it is doing (simply
@@ -95,8 +123,33 @@ namespace Marksman
         public List<IRequestResponse> SyncAll(SnipeItApi snipe, Asset currentAsset, Model currentModel, Manufacturer currentManufacturer,
             Category currentCategory, Company currentCompany, StatusLabel currentStatusLabel, Location currentLocation)
         {
-            // Returns a list of messages with return info.
-            // This could be broken down further
+            
+            // Let's try to simplify the logic into a repeatable structure:
+
+            // Each of these categories (Asset, Model, Location, etc.) has a single
+            // value that uniquely specifies it, which must be:
+            // a) Uniquely associated to it in the physical world
+            // b) Not the database unique ID
+
+            // Why can't it be the database unique ID? Because the uniqueID is not something that 
+            // is inherently associated to the computer's hardware, it's just a number that SnipeIT
+            // uses internally.
+
+            // By category: Unique identifiers
+
+            // Asset: computer serial (string)
+            // Model: model full name (string)
+            // Category: model types, as given by the WMIC fullnames (string)
+            // Manufacturer: full name (string)
+            // Company: full name (string)
+            // StatusLabel: full name (string)
+            // Location: full name (string)
+
+            // Really, we only need the update functionality for the assets, as the computer name can change,
+            // along with its location, etc.
+
+            // However we are not in change of things like a computer manufacturer changing the name of
+            // its company. So those have a simpler functionality.
 
 
             List<IRequestResponse> messages = new List<IRequestResponse>();
@@ -131,8 +184,31 @@ namespace Marksman
             currentAsset.Company = updatedCompany;
             currentAsset.StatusLabel = updatedStatusLabel;
             currentAsset.Location = updatedLocation;
-            messages.Add(snipe.AssetManager.Create(currentAsset));
 
+            string currentSerial = currentAsset.Serial;
+
+            Asset dbAsset = snipe.AssetManager.FindBySerial(currentSerial);
+
+            if (dbAsset == null)
+            {
+                Console.WriteLine("Asset does not exist in database, creating...");
+                snipe.AssetManager.Create(currentAsset);
+            } else
+            {
+                Console.WriteLine("Asset already exists in db. Checking for consistency.");
+                bool isIdentical = IsIdentical(currentAsset, dbAsset);
+                if (isIdentical)
+                {
+                    Console.WriteLine("No changes required!");
+                } else
+                {
+                    Console.WriteLine("Changes in asset detected. Updating:");
+                    // Insert update here
+                }
+            }
+
+            snipe.AssetManager.Create(currentAsset);
+            
             return messages;
         }
     }
