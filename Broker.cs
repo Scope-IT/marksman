@@ -35,10 +35,14 @@ namespace Marksman
                 return false;
             }
 
+            if (a1.Location?.Id != a2.Location?.Id)
+            {
+                return false;
+            }
 
             // Checking sub-object IDs
             if (a1.Company?.Id != a2.Company?.Id || a1.Model?.Id != a2.Model?.Id ||
-                a1.StatusLabel?.Id != a2.StatusLabel?.Id || a1.Location?.Id != a2.Location?.Id)
+                a1.StatusLabel?.Id != a2.StatusLabel?.Id)
             {
                 return false;
             }
@@ -206,7 +210,10 @@ namespace Marksman
 
                     // Setting old ID for consistency
                     currentAsset.Id = dbAsset.Id;
+                    currentAsset.LastCheckout = dbAsset.LastCheckout;
+                    currentAsset.AssignedTo = dbAsset.AssignedTo;
                     messages.Add(snipe.AssetManager.Update(currentAsset));
+
                 }
             }
             
