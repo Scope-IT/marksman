@@ -125,7 +125,7 @@ namespace Marksman
             string serialNumber = GetOutputVariable("Win32_ComputerSystemProduct.IdentifyingNumber");
             string macAddress = GetOutputVariable("Win32_NetworkAdapter.MACAddress");
             Dictionary<string, string> customFields = new Dictionary<string, string>();
-            customFields.Add("_snipeit_macaddress_1", macAddress);
+            customFields.Add("_snipeit_mac_address_1", macAddress);
             string warrantyMonths = appSettings["WarrantyMonths"];
 
             bool isInteractive = false;
