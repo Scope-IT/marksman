@@ -319,7 +319,7 @@ namespace Marksman
             mySentry.AddQuery("WMI", "SELECT IdentifyingNumber FROM Win32_ComputerSystemProduct");
             mySentry.AddQuery("WMI", "SELECT Name FROM Win32_BIOS");
             mySentry.AddQuery("WMI", "SELECT Manufacturer,Name,MACAddress FROM Win32_NetworkAdapter WHERE NetEnabled=true AND AdapterTypeId=0 AND netConnectionStatus=2");
-            mySentry.AddQuery("WMI", "SELECT Manufacturer,Model,SerialNumber FROM Win32_DiskDrive");
+            mySentry.AddQuery("WMI", "SELECT Manufacturer,Model,SerialNumber FROM Win32_DiskDrive WHERE Index=0");
             mySentry.AddQuery("WMI", "SELECT EndingAddress FROM Win32_MemoryArray");
             mySentry.AddQuery("WMI", "SELECT Name FROM Win32_DesktopMonitor");
             mySentry.AddQuery("WMI", "SELECT Manufacturer,Product,SerialNumber FROM Win32_BaseBoard");
